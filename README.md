@@ -1,2 +1,1 @@
-# rusty_jam
-Rusty game jam 2022
+# Rusty game jam 2022 Entry
