@@ -6,3 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bevy = "0.7"
+# TODO(@justint): check windows compatibility
+bevy_egui = "0.14"
