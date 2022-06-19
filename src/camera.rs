@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::camera::*;
-use bevy_inspector_egui::{Inspectable, InspectorPlugin, RegisterInspectable};
+use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use iyes_loopless::prelude::*;
 
 pub struct CameraPlugin;
