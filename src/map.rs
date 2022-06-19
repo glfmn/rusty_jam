@@ -16,6 +16,33 @@ impl Plugin for MapPlugin {
     }
 }
 
+#[derive(Component, Inspectable, PartialEq, Eq, Hash, Copy, Clone)]
+pub struct Location {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl From<Location> for Vec3 {
+    fn from(l: Location) -> Self {
+        // Center of the tile should be at the location
+        let offset = TILE_SIZE * 0.5;
+        Self::new(
+            l.x as f32 * TILE_SIZE + offset,
+            0.0,
+            l.y as f32 * TILE_SIZE + offset,
+        )
+    }
+}
+
+/// When location is changed, change the transform to match
+fn location_controller(
+    mut query: Query<(&Location, &mut Transform), Changed<Location>>,
+) {
+    for (loc, mut transform) in query.iter_mut() {
+        transform.translation = (*loc).into();
+    }
+}
+
 const TILE_MESH_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(Mesh::TYPE_UUID, 0x857e0e2d7312f367);
 
@@ -62,32 +89,5 @@ impl TileBundle {
                 ..Default::default()
             },
         }
-    }
-}
-
-#[derive(Component, Inspectable, PartialEq, Eq, Hash, Copy, Clone)]
-pub struct Location {
-    pub x: i32,
-    pub y: i32,
-}
-
-impl From<Location> for Vec3 {
-    fn from(l: Location) -> Self {
-        // Center of the tile should be at the location
-        let offset = TILE_SIZE * 0.5;
-        Self::new(
-            l.x as f32 * TILE_SIZE + offset,
-            0.0,
-            l.y as f32 * TILE_SIZE + offset,
-        )
-    }
-}
-
-/// When location is changed, change the transform to match
-fn location_controller(
-    mut query: Query<(&Location, &mut Transform), Changed<Location>>,
-) {
-    for (loc, mut transform) in query.iter_mut() {
-        transform.translation = (*loc).into();
     }
 }
