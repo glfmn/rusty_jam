@@ -3,10 +3,14 @@ use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod camera;
+mod material;
+
+use material::{RenderPlugin, UnlitMaterial};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugin(RenderPlugin)
         .add_plugin(EguiPlugin)
         .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(camera::CameraPlugin)
@@ -20,15 +24,12 @@ fn main() {
 fn test_plane(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<UnlitMaterial>>,
 ) {
     // Spawn the ground
-    commands.spawn_bundle(PbrBundle {
+    commands.spawn_bundle(MaterialMeshBundle {
         mesh: meshes.add(Mesh::from(shape::Plane { size: 1.0 })),
-        material: materials.add(StandardMaterial {
-            base_color: Color::WHITE,
-            ..Default::default()
-        }),
+        material: materials.add(UnlitMaterial::default()),
         ..Default::default()
     });
 }
