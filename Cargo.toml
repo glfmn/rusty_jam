@@ -9,3 +9,8 @@ edition = "2021"
 bevy = "0.7"
 # TODO(@justint): check windows compatibility
 bevy_egui = "0.14"
+
+[dependencies.iyes_loopless]
+git = "https://github.com/IyesGames/iyes_loopless"
+branch = "main"
+features = ["states"]
