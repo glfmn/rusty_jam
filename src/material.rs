@@ -49,6 +49,8 @@ fn extract_default_texture(
     commands.insert_resource(texture.clone())
 }
 
+pub type UnlitMaterialBundle = MaterialMeshBundle<UnlitMaterial>;
+
 /// Render flat material
 #[derive(Debug, Clone, TypeUuid)]
 #[uuid = "f1aacff7-3eea-4a71-836a-efbcb11fe870"]
