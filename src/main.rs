@@ -28,11 +28,14 @@ fn main() {
 fn test_map(
     mut commands: Commands,
     mut materials: ResMut<Assets<UnlitMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     use map::{Direction, Location, TileBundle, WallBundle};
 
     // Add handle for blank material
-    let material = materials.add(UnlitMaterial::default());
+    let material = materials.add(UnlitMaterial::new(
+        asset_server.load("textures/uv_tester.png"),
+    ));
 
     // Spawn the ground
     commands.spawn_bundle(TileBundle::new(

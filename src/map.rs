@@ -192,7 +192,7 @@ impl FromWorld for WallMesh {
 
         mesh.insert_attribute(
             Mesh::ATTRIBUTE_UV_0,
-            vec![[0.0, 0.0], [0.0, 1.0], [1.0, 0.0], [1.0, 1.0]],
+            vec![[1.0, 1.0], [1.0, 0.0], [0.0, 1.0], [0.0, 0.0]],
         );
 
         let normal = [-1.0, 0.0, 0.0];

@@ -59,7 +59,7 @@ pub struct UnlitMaterial {
 }
 
 impl UnlitMaterial {
-    fn new(texture: Handle<Image>) -> Self {
+    pub fn new(texture: Handle<Image>) -> Self {
         Self {
             texture: Some(texture),
         }
