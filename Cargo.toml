@@ -5,9 +5,16 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+# Enable only a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
 [dependencies]
 bevy = "0.7"
-# TODO(@justint): check windows compatibility
 bevy_egui = "0.14" # bevy 0.7 compatible
 bevy-inspector-egui = "0.11" # bevy 0.7 compatible
 
