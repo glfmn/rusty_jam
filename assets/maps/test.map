@@ -1,0 +1,36 @@
+name: Test Map
+tiles:
+  - pos: [0, 0]
+  - pos: [0, 1]
+  - pos: [1, 0]
+  - pos: [-1, 0]
+  - pos: [0, -1]
+  - pos: [1, 1]
+  - pos: [1, -1]
+  - pos: [-1, 1]
+  - pos: [-1, -1]
+walls:
+  - pos: [-1, 1]
+    direction: +y
+  - pos: [0, 1]
+    direction: +y
+  - pos: [1, 1]
+    direction: +y
+  - pos: [1, -1]
+    direction: +x
+  - pos: [1, 0]
+    direction: +x
+  - pos: [1, 1]
+    direction: +x
+  - pos: [-1, -1]
+    direction: -x
+  - pos: [-1, 0]
+    direction: -x
+  - pos: [-1, 1]
+    direction: -x
+  - pos: [-1, -1]
+    direction: -y
+  - pos: [0, -1]
+    direction: -y
+  - pos: [1, -1]
+    direction: -y

@@ -4,6 +4,10 @@ use bevy::{prelude::*, render::mesh::Indices};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use iyes_loopless::prelude::*;
 
+mod loading;
+
+pub use loading::Map;
+
 /// Square tile side length
 pub const TILE_SIZE: f32 = 0.33;
 pub const WALL_HEIGHT: f32 = 0.45;
@@ -18,80 +22,29 @@ impl Plugin for MapPlugin {
             .register_inspectable::<Direction>()
             .init_resource::<TileMesh>()
             .init_resource::<WallMesh>()
+            .add_asset::<loading::Map>()
+            .init_asset_loader::<loading::MapLoader>()
+            .add_event::<loading::MapEvent>()
+            .add_system(loading::detect_changes.label("detect_map_changes"))
+            .add_system(loading::update_map.after("detect_map_changes"))
             .add_system_set(
                 ConditionSet::new()
                     .with_system(location_controller)
                     .with_system(direction_controller)
                     .into(),
             )
-            .add_startup_system(test_map);
+            .add_startup_system(load_test_map);
     }
 }
 
-/// Tag to identify parent map entity
-#[derive(Component)]
-pub struct Map;
+pub struct ActiveMap {
+    map: Handle<Map>,
+}
 
-fn test_map(
-    mut commands: Commands,
-    mut materials: ResMut<Assets<UnlitMaterial>>,
-    asset_server: Res<AssetServer>,
-) {
-    // Add handle for blank material
-    let material = materials.add(UnlitMaterial::new(
-        asset_server.load("textures/uv_tester.png"),
-    ));
-
-    commands
-        .spawn()
-        .insert(Map)
-        .insert(Transform::default())
-        .insert(GlobalTransform::default())
-        .with_children(|parent| {
-            // Spawn the ground
-            parent.spawn_bundle(TileBundle::new(
-                Location { x: 0, y: 0 },
-                material.clone(),
-            ));
-            parent.spawn_bundle(TileBundle::new(
-                Location { x: 1, y: 0 },
-                material.clone(),
-            ));
-            parent.spawn_bundle(TileBundle::new(
-                Location { x: 0, y: 1 },
-                material.clone(),
-            ));
-            parent.spawn_bundle(TileBundle::new(
-                Location { x: 0, y: -1 },
-                material.clone(),
-            ));
-            parent.spawn_bundle(TileBundle::new(
-                Location { x: -1, y: 0 },
-                material.clone(),
-            ));
-
-            // Spawn walls
-            parent.spawn_bundle(WallBundle::new(
-                Location { x: -1, y: 0 },
-                Direction::NegativeX,
-                material.clone(),
-            ));
-            parent.spawn_bundle(WallBundle::new(
-                Location { x: 1, y: 0 },
-                Direction::PositiveX,
-                material.clone(),
-            ));
-            parent.spawn_bundle(WallBundle::new(
-                Location { x: 0, y: 1 },
-                Direction::PositiveY,
-                material.clone(),
-            ));
-            parent.spawn_bundle(WallBundle::new(
-                Location { x: 0, y: -1 },
-                Direction::NegativeY,
-                material.clone(),
-            ));
-        });
+fn load_test_map(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(ActiveMap {
+        map: asset_server.load("maps/test.map"),
+    })
 }
 
 #[derive(Component, Inspectable, PartialEq, Eq, Hash, Copy, Clone)]
@@ -106,6 +59,12 @@ impl From<Location> for Vec3 {
     }
 }
 
+impl From<(i32, i32)> for Location {
+    fn from((x, y): (i32, i32)) -> Self {
+        Self { x, y }
+    }
+}
+
 /// When location is changed, change the transform to match
 fn location_controller(
     mut query: Query<(&Location, &mut Transform), Changed<Location>>,
@@ -116,11 +75,15 @@ fn location_controller(
 }
 
 /// Direction on the (x,y) plane
-#[derive(Copy, Clone, Component, Inspectable)]
+#[derive(Debug, Copy, Clone, Component, Inspectable, serde::Deserialize)]
 pub enum Direction {
+    #[serde(rename = "+x")]
     PositiveX,
+    #[serde(rename = "-y")]
     NegativeY,
+    #[serde(rename = "-x")]
     NegativeX,
+    #[serde(rename = "+y")]
     PositiveY,
 }
 
