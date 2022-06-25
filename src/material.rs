@@ -108,7 +108,6 @@ impl RenderAsset for UnlitMaterial {
             Some(texture) => texture,
             // Try again if the image isn't loaded
             None => {
-                debug!("Texture ({:?}) not yet loaded", asset.texture);
                 return Err(PrepareAssetError::RetryNextUpdate(asset));
             }
         };

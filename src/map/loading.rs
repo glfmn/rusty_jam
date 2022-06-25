@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use bevy::asset::{AssetEvent, AssetLoader, LoadContext, LoadedAsset};
 use bevy::prelude::*;
 use bevy::reflect::TypeUuid;
@@ -10,12 +12,14 @@ use crate::material::UnlitMaterial;
 #[derive(Debug, Deserialize)]
 struct MapTile {
     pos: (i32, i32),
+    texture: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
 struct MapWall {
     pos: (i32, i32),
     direction: Direction,
+    texture: Option<PathBuf>,
 }
 
 /// Map defined as an asset
@@ -95,6 +99,7 @@ pub fn update_map(
     map_query: Query<Entity, With<Handle<Map>>>,
     maps: Res<Assets<Map>>,
     mut map_events: EventReader<MapEvent>,
+    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<UnlitMaterial>>,
 ) {
     for event in map_events.iter() {
@@ -114,7 +119,7 @@ pub fn update_map(
                         .id()
                 });
 
-                let material = materials.add(UnlitMaterial::default());
+                let default_material = materials.add(UnlitMaterial::default());
 
                 commands.entity(entity).despawn_descendants();
                 commands
@@ -122,17 +127,35 @@ pub fn update_map(
                     .insert(handle.clone())
                     .with_children(|parent| {
                         for tile in map.tiles.iter() {
+                            let material = tile
+                                .texture
+                                .as_ref()
+                                .map(|path| asset_server.load(path.as_path()))
+                                .map(|handle| {
+                                    materials.add(UnlitMaterial::new(handle))
+                                })
+                                .unwrap_or_else(|| default_material.clone());
+
                             parent.spawn_bundle(TileBundle::new(
                                 tile.pos.into(),
-                                material.clone(),
+                                material,
                             ));
                         }
 
                         for wall in map.walls.iter() {
+                            let material = wall
+                                .texture
+                                .as_ref()
+                                .map(|path| asset_server.load(path.as_path()))
+                                .map(|handle| {
+                                    materials.add(UnlitMaterial::new(handle))
+                                })
+                                .unwrap_or_else(|| default_material.clone());
+
                             parent.spawn_bundle(WallBundle::new(
                                 wall.pos.into(),
                                 wall.direction,
-                                material.clone(),
+                                material,
                             ));
                         }
                     });
