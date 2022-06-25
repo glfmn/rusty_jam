@@ -12,21 +12,30 @@ use crate::material::UnlitMaterial;
 #[derive(Debug, Deserialize)]
 struct MapTile {
     pos: (i32, i32),
-    texture: Option<PathBuf>,
 }
 
 #[derive(Debug, Deserialize)]
 struct MapWall {
     pos: (i32, i32),
     direction: Direction,
-    texture: Option<PathBuf>,
 }
 
 /// Map defined as an asset
-#[derive(Debug, Deserialize, TypeUuid)]
+#[derive(Debug, TypeUuid)]
 #[uuid = "b6f944ca-0812-42d0-8466-84c39ed401a1"]
 pub struct Map {
     name: String,
+    tile_texture: Handle<Image>,
+    wall_texture: Handle<Image>,
+    tiles: Vec<MapTile>,
+    walls: Vec<MapWall>,
+}
+
+#[derive(Debug, Deserialize)]
+struct MapFile {
+    name: String,
+    tile_texture: PathBuf,
+    wall_texture: PathBuf,
     tiles: Vec<MapTile>,
     walls: Vec<MapWall>,
 }
@@ -42,8 +51,22 @@ impl AssetLoader for MapLoader {
         load_context: &'a mut LoadContext,
     ) -> BoxedFuture<'a, Result<(), anyhow::Error>> {
         Box::pin(async move {
-            let custom_asset = serde_yaml::from_slice::<Map>(bytes)?;
-            load_context.set_default_asset(LoadedAsset::new(custom_asset));
+            let map_file = serde_yaml::from_slice::<MapFile>(bytes)?;
+            let tile_texture = load_context
+                .get_handle(map_file.tile_texture.to_str().unwrap());
+            let wall_texture = load_context
+                .get_handle(map_file.wall_texture.to_str().unwrap());
+            let map = Map {
+                name: map_file.name,
+                tile_texture,
+                wall_texture,
+                tiles: map_file.tiles,
+                walls: map_file.walls,
+            };
+            let asset = LoadedAsset::new(map)
+                .with_dependency(map_file.tile_texture.into())
+                .with_dependency(map_file.wall_texture.into());
+            load_context.set_default_asset(asset);
             Ok(())
         })
     }
@@ -99,7 +122,6 @@ pub fn update_map(
     map_query: Query<Entity, With<Handle<Map>>>,
     maps: Res<Assets<Map>>,
     mut map_events: EventReader<MapEvent>,
-    asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<UnlitMaterial>>,
 ) {
     for event in map_events.iter() {
@@ -119,7 +141,11 @@ pub fn update_map(
                         .id()
                 });
 
-                let default_material = materials.add(UnlitMaterial::default());
+                let tile_material =
+                    materials.add(UnlitMaterial::new(map.tile_texture.clone()));
+
+                let wall_material =
+                    materials.add(UnlitMaterial::new(map.wall_texture.clone()));
 
                 commands.entity(entity).despawn_descendants();
                 commands
@@ -127,35 +153,17 @@ pub fn update_map(
                     .insert(handle.clone())
                     .with_children(|parent| {
                         for tile in map.tiles.iter() {
-                            let material = tile
-                                .texture
-                                .as_ref()
-                                .map(|path| asset_server.load(path.as_path()))
-                                .map(|handle| {
-                                    materials.add(UnlitMaterial::new(handle))
-                                })
-                                .unwrap_or_else(|| default_material.clone());
-
                             parent.spawn_bundle(TileBundle::new(
                                 tile.pos.into(),
-                                material,
+                                tile_material.clone(),
                             ));
                         }
 
                         for wall in map.walls.iter() {
-                            let material = wall
-                                .texture
-                                .as_ref()
-                                .map(|path| asset_server.load(path.as_path()))
-                                .map(|handle| {
-                                    materials.add(UnlitMaterial::new(handle))
-                                })
-                                .unwrap_or_else(|| default_material.clone());
-
                             parent.spawn_bundle(WallBundle::new(
                                 wall.pos.into(),
                                 wall.direction,
-                                material,
+                                wall_material.clone(),
                             ));
                         }
                     });

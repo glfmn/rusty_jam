@@ -1,57 +1,38 @@
 name: Test Map
+tile_texture: textures/uv_tester.png
 tiles:
   - pos: [0, 0]
-    texture: "textures/uv_tester.png"
   - pos: [0, 1]
-    texture: "textures/uv_tester.png"
   - pos: [1, 0]
-    texture: "textures/uv_tester.png"
   - pos: [-1, 0]
-    texture: "textures/uv_tester.png"
   - pos: [0, -1]
-    texture: "textures/uv_tester.png"
   - pos: [1, 1]
-    texture: "textures/uv_tester.png"
   - pos: [1, -1]
-    texture: "textures/uv_tester.png"
   - pos: [-1, 1]
-    texture: "textures/uv_tester.png"
   - pos: [-1, -1]
-    texture: "textures/uv_tester.png"
+wall_texture: textures/uv_tester.png
 walls:
   - pos: [-1, 1]
     direction: +y
-    texture: "textures/uv_tester.png"
   - pos: [0, 1]
     direction: +y
-    texture: "textures/uv_tester.png"
   - pos: [1, 1]
     direction: +y
-    texture: "textures/uv_tester.png"
-  - pos: [1, -1]
+  - pos: [0, -1]
     direction: +x
-    texture: "textures/uv_tester.png"
   - pos: [1, 0]
     direction: +x
-    texture: "textures/uv_tester.png"
   - pos: [1, 1]
     direction: +x
-    texture: "textures/uv_tester.png"
   - pos: [-1, -1]
     direction: -x
-    texture: "textures/uv_tester.png"
   - pos: [-1, 0]
     direction: -x
-    texture: "textures/uv_tester.png"
   - pos: [-1, 1]
     direction: -x
-    texture: "textures/uv_tester.png"
   - pos: [-1, -1]
     direction: -y
-    texture: "textures/uv_tester.png"
   - pos: [0, -1]
     direction: -y
-    texture: "textures/uv_tester.png"
   - pos: [1, -1]
     direction: -y
-    texture: "textures/uv_tester.png"
