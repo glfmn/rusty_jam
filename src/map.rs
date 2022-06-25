@@ -12,7 +12,9 @@ pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
-        app.register_inspectable::<Location>()
+        app.register_inspectable::<Tile>()
+            .register_inspectable::<Wall>()
+            .register_inspectable::<Location>()
             .register_inspectable::<Direction>()
             .add_system_set(
                 ConditionSet::new()
@@ -97,8 +99,13 @@ impl FromWorld for TileMesh {
     }
 }
 
+/// Tag component to differentiate tiles when querying for floor tiles
+#[derive(Component, Inspectable)]
+pub struct Tile;
+
 #[derive(Bundle)]
 pub struct TileBundle {
+    tag: Tile,
     pub grid_pos: Location,
     #[bundle]
     pub render: UnlitMaterialBundle,
@@ -108,6 +115,7 @@ impl TileBundle {
     /// Create a tile at the given location with the provided material
     pub fn new(grid_pos: Location, material: Handle<UnlitMaterial>) -> Self {
         Self {
+            tag: Tile,
             grid_pos,
             render: UnlitMaterialBundle {
                 material,
@@ -122,9 +130,14 @@ impl TileBundle {
     }
 }
 
+/// Tag component to differentiate walls when querying for wall
+#[derive(Component, Inspectable)]
+pub struct Wall;
+
 /// Simple vertical wall
 #[derive(Bundle)]
 pub struct WallBundle {
+    tag: Wall,
     location: Location,
     direction: Direction,
     #[bundle]
@@ -139,6 +152,7 @@ impl WallBundle {
     ) -> Self {
         let grid_pos: Vec3 = location.into();
         Self {
+            tag: Wall,
             location,
             direction,
             render: UnlitMaterialBundle {
