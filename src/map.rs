@@ -16,15 +16,82 @@ impl Plugin for MapPlugin {
             .register_inspectable::<Wall>()
             .register_inspectable::<Location>()
             .register_inspectable::<Direction>()
+            .init_resource::<TileMesh>()
+            .init_resource::<WallMesh>()
             .add_system_set(
                 ConditionSet::new()
                     .with_system(location_controller)
                     .with_system(direction_controller)
                     .into(),
             )
-            .init_resource::<TileMesh>()
-            .init_resource::<WallMesh>();
+            .add_startup_system(test_map);
     }
+}
+
+/// Tag to identify parent map entity
+#[derive(Component)]
+pub struct Map;
+
+fn test_map(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<UnlitMaterial>>,
+    asset_server: Res<AssetServer>,
+) {
+    // Add handle for blank material
+    let material = materials.add(UnlitMaterial::new(
+        asset_server.load("textures/uv_tester.png"),
+    ));
+
+    commands
+        .spawn()
+        .insert(Map)
+        .insert(Transform::default())
+        .insert(GlobalTransform::default())
+        .with_children(|parent| {
+            // Spawn the ground
+            parent.spawn_bundle(TileBundle::new(
+                Location { x: 0, y: 0 },
+                material.clone(),
+            ));
+            parent.spawn_bundle(TileBundle::new(
+                Location { x: 1, y: 0 },
+                material.clone(),
+            ));
+            parent.spawn_bundle(TileBundle::new(
+                Location { x: 0, y: 1 },
+                material.clone(),
+            ));
+            parent.spawn_bundle(TileBundle::new(
+                Location { x: 0, y: -1 },
+                material.clone(),
+            ));
+            parent.spawn_bundle(TileBundle::new(
+                Location { x: -1, y: 0 },
+                material.clone(),
+            ));
+
+            // Spawn walls
+            parent.spawn_bundle(WallBundle::new(
+                Location { x: -1, y: 0 },
+                Direction::NegativeX,
+                material.clone(),
+            ));
+            parent.spawn_bundle(WallBundle::new(
+                Location { x: 1, y: 0 },
+                Direction::PositiveX,
+                material.clone(),
+            ));
+            parent.spawn_bundle(WallBundle::new(
+                Location { x: 0, y: 1 },
+                Direction::PositiveY,
+                material.clone(),
+            ));
+            parent.spawn_bundle(WallBundle::new(
+                Location { x: 0, y: -1 },
+                Direction::NegativeY,
+                material.clone(),
+            ));
+        });
 }
 
 #[derive(Component, Inspectable, PartialEq, Eq, Hash, Copy, Clone)]
