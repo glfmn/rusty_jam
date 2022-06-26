@@ -141,11 +141,11 @@ pub fn update_map(
                         .id()
                 });
 
-                let tile_material =
-                    materials.add(UnlitMaterial::new(map.tile_texture.clone()));
+                let tile_material = materials
+                    .add(UnlitMaterial::full_sheet(map.tile_texture.clone()));
 
-                let wall_material =
-                    materials.add(UnlitMaterial::new(map.wall_texture.clone()));
+                let wall_material = materials
+                    .add(UnlitMaterial::full_sheet(map.wall_texture.clone()));
 
                 commands.entity(entity).despawn_descendants();
                 commands

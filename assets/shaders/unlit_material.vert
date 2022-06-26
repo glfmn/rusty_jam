@@ -16,6 +16,10 @@ layout(set = 0, binding = 0) uniform CameraViewProj {
     float height;
 };
 
+layout(set = 1, binding = 2) uniform Material {
+    vec4 UvOffset;
+};
+
 layout(set = 2, binding = 0) uniform Mesh {
     mat4 Model;
     mat4 InverseTransposeModel;
@@ -24,5 +28,7 @@ layout(set = 2, binding = 0) uniform Mesh {
 
 void main() {
     gl_Position = ViewProj * Model * vec4(Vertex_Position, 1.0);
-    o_uv = Vertex_Uv;
+
+    // Offset UVs into the specific region for this sprite
+    o_uv = mix(UvOffset.xy, UvOffset.zw, Vertex_Uv);
 }
