@@ -1,38 +1,57 @@
 name: Test Map
-tile_texture: textures/uv_tester.png
+tile_sprites:
+  sprite_sheet: textures/uv_tester.png
+  grid_dimensions: [32, 32]
 tiles:
   - pos: [0, 0]
+    id: 1
   - pos: [0, 1]
+    id: 3
   - pos: [1, 0]
+    id: 5
   - pos: [-1, 0]
+    id: 7
   - pos: [0, -1]
+    id: 10
   - pos: [1, 1]
+    id: 8
   - pos: [1, -1]
+    id: 12
   - pos: [-1, 1]
+    id: 14
   - pos: [-1, -1]
-wall_texture: textures/uv_tester.png
+    id: 17
+wall_sprites:
+  sprite_sheet: textures/uv_tester.png
+  grid_dimensions: [32, 64]
 walls:
   - pos: [-1, 1]
     direction: +y
+    id: 1
   - pos: [0, 1]
     direction: +y
   - pos: [1, 1]
     direction: +y
+    id: 5
   - pos: [1, -1]
     direction: +x
   - pos: [1, 0]
     direction: +x
+    id: 3
   - pos: [1, 1]
     direction: +x
   - pos: [-1, -1]
     direction: -x
   - pos: [-1, 0]
     direction: -x
+    id: 9
   - pos: [-1, 1]
     direction: -x
   - pos: [-1, -1]
     direction: -y
+    id: 9
   - pos: [0, -1]
     direction: -y
   - pos: [1, -1]
     direction: -y
+    id: 15

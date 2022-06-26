@@ -9,8 +9,8 @@ mod loading;
 pub use loading::Map;
 
 /// Square tile side length
-pub const TILE_SIZE: f32 = 0.33;
-pub const WALL_HEIGHT: f32 = 0.45;
+pub const TILE_SIZE: f32 = 0.2;
+pub const WALL_HEIGHT: f32 = 0.5;
 
 pub struct MapPlugin;
 
@@ -22,7 +22,7 @@ impl Plugin for MapPlugin {
             .register_inspectable::<Direction>()
             .init_resource::<TileMesh>()
             .init_resource::<WallMesh>()
-            .add_asset::<loading::Map>()
+            .add_asset::<Map>()
             .init_asset_loader::<loading::MapLoader>()
             .add_event::<loading::MapEvent>()
             .add_system(loading::detect_changes.label("detect_map_changes"))

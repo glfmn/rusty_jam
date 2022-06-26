@@ -34,6 +34,7 @@ pub struct UnlitMaterial {
 
 impl UnlitMaterial {
     /// Render the entire sprite sheet
+    #[allow(unused)]
     pub const FULL_SHEET: Rect<f32> = Rect {
         // WGPU/Bevy uses (0,0) as top left, (1,1) as bottom right
         top: 0.,
@@ -50,6 +51,8 @@ impl UnlitMaterial {
         }
     }
 
+    /// Render the entire texture, unaltered
+    #[allow(unused)]
     pub fn full_sheet(sprite_sheet: Handle<Image>) -> Self {
         Self {
             sprite_sheet,
