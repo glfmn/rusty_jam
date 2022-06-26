@@ -18,7 +18,7 @@ walls:
     direction: +y
   - pos: [1, 1]
     direction: +y
-  - pos: [0, -1]
+  - pos: [1, -1]
     direction: +x
   - pos: [1, 0]
     direction: +x
