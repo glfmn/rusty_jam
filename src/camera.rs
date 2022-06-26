@@ -90,7 +90,7 @@ impl Default for YawPitchControls {
     fn default() -> Self {
         YawPitchControls {
             focus: Vec3::ZERO,
-            pitch: f32::to_radians(45.0),
+            pitch: f32::to_radians(30.0),
             yaw: f32::to_radians(45.0),
             dist: 1.0,
         }

@@ -4,25 +4,47 @@ use bevy::{prelude::*, render::mesh::Indices};
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use iyes_loopless::prelude::*;
 
+mod loading;
+
+pub use loading::Map;
+
 /// Square tile side length
-pub const TILE_SIZE: f32 = 0.33;
-pub const WALL_HEIGHT: f32 = 0.45;
+pub const TILE_SIZE: f32 = 0.2;
+pub const WALL_HEIGHT: f32 = 0.5;
 
 pub struct MapPlugin;
 
 impl Plugin for MapPlugin {
     fn build(&self, app: &mut App) {
-        app.register_inspectable::<Location>()
+        app.register_inspectable::<Tile>()
+            .register_inspectable::<Wall>()
+            .register_inspectable::<Location>()
             .register_inspectable::<Direction>()
+            .init_resource::<TileMesh>()
+            .init_resource::<WallMesh>()
+            .add_asset::<Map>()
+            .init_asset_loader::<loading::MapLoader>()
+            .add_event::<loading::MapEvent>()
+            .add_system(loading::detect_changes.label("detect_map_changes"))
+            .add_system(loading::update_map.after("detect_map_changes"))
             .add_system_set(
                 ConditionSet::new()
                     .with_system(location_controller)
                     .with_system(direction_controller)
                     .into(),
             )
-            .init_resource::<TileMesh>()
-            .init_resource::<WallMesh>();
+            .add_startup_system(load_test_map);
     }
+}
+
+pub struct ActiveMap {
+    map: Handle<Map>,
+}
+
+fn load_test_map(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(ActiveMap {
+        map: asset_server.load("maps/test.map"),
+    })
 }
 
 #[derive(Component, Inspectable, PartialEq, Eq, Hash, Copy, Clone)]
@@ -37,6 +59,12 @@ impl From<Location> for Vec3 {
     }
 }
 
+impl From<(i32, i32)> for Location {
+    fn from((x, y): (i32, i32)) -> Self {
+        Self { x, y }
+    }
+}
+
 /// When location is changed, change the transform to match
 fn location_controller(
     mut query: Query<(&Location, &mut Transform), Changed<Location>>,
@@ -47,11 +75,15 @@ fn location_controller(
 }
 
 /// Direction on the (x,y) plane
-#[derive(Copy, Clone, Component, Inspectable)]
+#[derive(Debug, Copy, Clone, Component, Inspectable, serde::Deserialize)]
 pub enum Direction {
+    #[serde(rename = "+x")]
     PositiveX,
+    #[serde(rename = "-y")]
     NegativeY,
+    #[serde(rename = "-x")]
     NegativeX,
+    #[serde(rename = "+y")]
     PositiveY,
 }
 
@@ -97,8 +129,13 @@ impl FromWorld for TileMesh {
     }
 }
 
+/// Tag component to differentiate tiles when querying for floor tiles
+#[derive(Component, Inspectable)]
+pub struct Tile;
+
 #[derive(Bundle)]
 pub struct TileBundle {
+    tag: Tile,
     pub grid_pos: Location,
     #[bundle]
     pub render: UnlitMaterialBundle,
@@ -108,6 +145,7 @@ impl TileBundle {
     /// Create a tile at the given location with the provided material
     pub fn new(grid_pos: Location, material: Handle<UnlitMaterial>) -> Self {
         Self {
+            tag: Tile,
             grid_pos,
             render: UnlitMaterialBundle {
                 material,
@@ -122,9 +160,14 @@ impl TileBundle {
     }
 }
 
+/// Tag component to differentiate walls when querying for wall
+#[derive(Component, Inspectable)]
+pub struct Wall;
+
 /// Simple vertical wall
 #[derive(Bundle)]
 pub struct WallBundle {
+    tag: Wall,
     location: Location,
     direction: Direction,
     #[bundle]
@@ -139,6 +182,7 @@ impl WallBundle {
     ) -> Self {
         let grid_pos: Vec3 = location.into();
         Self {
+            tag: Wall,
             location,
             direction,
             render: UnlitMaterialBundle {
